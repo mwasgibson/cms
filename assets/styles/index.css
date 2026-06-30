@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  /* ================================================
+   * EXACT design tokens from pandatowers.africa
+   * Source: index-B-uODWgz.css :root block
+   * ================================================ */
+
+  /* Primary — dark charcoal/slate (210 9% 22%) */
+  --color-brand-50:  hsl(210 9% 97%);
+  --color-brand-100: hsl(35 15% 88%);   /* --border */
+  --color-brand-200: hsl(35 25% 88%);   /* --secondary-dark */
+  --color-brand-500: hsl(210 8% 35%);   /* --primary-light */
+  --color-brand-600: hsl(210 9% 22%);   /* --primary */
+  --color-brand-700: hsl(210 10% 15%);  /* --primary-dark */
+  --color-brand-900: hsl(210 8% 25%);   /* --foreground */
+
+  /* Accent — green (150 45% 42%) */
+  --color-accent-400: hsl(150 50% 37%); /* --accent-hover */
+  --color-accent-500: hsl(150 45% 42%); /* --accent */
+  --color-accent-100: hsl(150 35% 88%); /* --accent-light */
+
+  /* Copper/warm gold (29 56% 46%) */
+  --color-copper-500: hsl(29 56% 46%);  /* --copper */
+  --color-copper-400: hsl(29 60% 42%);  /* --copper-hover */
+  --color-copper-100: hsl(29 60% 90%);  /* --copper-light */
+
+  /* Secondary — warm sand (35 30% 94%) */
+  --color-sand-50:  hsl(35 20% 96%);    /* --muted */
+  --color-sand-100: hsl(35 30% 94%);    /* --secondary */
+  --color-sand-200: hsl(35 15% 94%);    /* --input */
+
+  /* Semantic */
+  --color-muted: hsl(210 6% 50%);       /* --muted-foreground */
+
+  /* Fonts — exact from CSS */
+  --font-serif:   'Alexandra', 'Georgia', serif;   /* headings */
+  --font-display: 'Alexandra', 'Georgia', serif;
+  --font-body:    'Albert Sans', system-ui, sans-serif;
+
+  /* Radius — exact from CSS */
+  --radius: 0.5rem;
+
+  /* Shadows */
+  --shadow-elegant: 0 20px 40px -12px hsl(0 0% 0% / 0.15);
+  --shadow-card:    0 8px 25px -8px hsl(0 0% 0% / 0.1);
+}
+
+body {
+  font-family: var(--font-body);
+  color: hsl(210 8% 25%);
+  background-color: hsl(35 20% 96%);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 1. Prevent numbers from breaking layout */
+.mb-6.grid p.text-xl {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  line-height: 1.2;
+}
+
+/* 2. Make columns responsive to their content size rather than just the screen width */
+@media (max-width: 400px) {
+  .mb-6.grid.grid-cols-2 {
+    /* Fallback to 1 column if the screen is extremely narrow */
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 3. Alternative: Fluid grid that doesn't force 2 columns if there isn't room */
+.mb-6.grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+}
