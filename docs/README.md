@@ -1,4 +1,4 @@
-# Panda Towers Admin
+# Admin
 
 This repository contains the React + Vite admin frontend for Panda Towers. It is a separate app from the public marketing site and is used to manage content and records for the investment platform.
 
