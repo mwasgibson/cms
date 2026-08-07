@@ -19,10 +19,21 @@ export async function login({ email, password }) {
     auditLog.record('login', 'auth', user.id)
     return user
   }
+
+  // Hotel backend returns { message, role, token } — no embedded user object,
+  // and login succeeds for any valid account regardless of role. This admin
+  // panel is admin-only, so we reject non-admins here even though their
+  // credentials were valid.
   const { data } = await http.post(API.LOGIN, { email, password })
+  if (data.role !== 'admin') {
+    throw Object.assign(new Error('This admin panel is restricted to hotel administrators.'), {
+      response: { data: { message: 'This admin panel is restricted to hotel administrators.' } },
+    })
+  }
   localStorage.setItem(TOKEN_KEY, data.token)
-  auditLog.record('login', 'auth', data.user?.id)
-  return data.user
+  const user = await fetchCurrentUser()
+  auditLog.record('login', 'auth', user?.id)
+  return user
 }
 
 export async function logout() {
