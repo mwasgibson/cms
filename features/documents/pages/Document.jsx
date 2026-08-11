@@ -1,6 +1,6 @@
 import { useDocuments } from '../hooks/useDocuments'
-import DocumentUploadForm from '../components/DocumentUploadForm'
-import DocumentList from '../components/DocumentList'
+import DocumentsForm from '../components/DocumentsForm'
+import DocumentsTable from '../components/DocumentsTable'
 import { useToast } from '../../../hooks/useToast'
 import { usePermission } from '../../../hooks/usePermission'
 
@@ -36,11 +36,11 @@ export default function Documents() {
       </div>
 
       {perms.canCreate && (
-        <DocumentUploadForm onUpload={handleUpload} />
+        <DocumentsForm onUpload={handleUpload} />
       )}
 
       {error && <p className="mb-4 text-sm text-red-600">Couldn't load documents. Try refreshing.</p>}
-      <DocumentList documents={documents} loading={loading} onDelete={handleDelete} />
+      <DocumentsTable documents={documents} loading={loading} onDelete={handleDelete} />
     </div>
   )
 }
