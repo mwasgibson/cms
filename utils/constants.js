@@ -30,6 +30,8 @@ export const API = {
   DEALS:              '/deals',
   DEAL:               (id) => `/deals/${id}`,
   DEALS_ADMIN:        '/deals/admin',
+  DOCUMENTS:          '/documents',
+  DOCUMENT:           (id) => `/documents/${id}`,
   POSTS:              '/posts',
   POST:               (id) => `/posts/${id}`,
   CONTENT:            '/content',
@@ -53,6 +55,7 @@ export const PERMISSIONS = {
   [ROLES.ADMIN]: [
     'rooms.create', 'rooms.edit', 'rooms.delete',
     'deals.create', 'deals.edit', 'deals.delete',
+    'documents.create', 'documents.delete',
     'blog.create', 'blog.edit', 'blog.delete',
     'content.edit',
     'settings.edit',
@@ -61,24 +64,26 @@ export const PERMISSIONS = {
 
 // ─── DOCUMENT ────────────────────────────────────────────────────────────────
 export const DOCUMENT_CATEGORY = {
-  BROCHURE:        'brochure',
-  FLOOR_PLAN:      'floor_plan',
-  INVESTMENT_DECK: 'investment_deck',
-  OTHER:           'other',
+  MENU:       'menu',
+  POLICY:     'policy',
+  FLOOR_PLAN: 'floor_plan',
+  BROCHURE:   'brochure',
+  OTHER:      'other',
 }
 
 export const DOCUMENT_CATEGORY_LABELS = {
-  [DOCUMENT_CATEGORY.BROCHURE]:        'Brochure',
-  [DOCUMENT_CATEGORY.FLOOR_PLAN]:      'Floor Plan',
-  [DOCUMENT_CATEGORY.INVESTMENT_DECK]: 'Investment Deck',
-  [DOCUMENT_CATEGORY.OTHER]:           'Other',
+  [DOCUMENT_CATEGORY.MENU]:       'Menu',
+  [DOCUMENT_CATEGORY.POLICY]:     'Policy',
+  [DOCUMENT_CATEGORY.FLOOR_PLAN]: 'Floor Plan',
+  [DOCUMENT_CATEGORY.BROCHURE]:   'Brochure',
+  [DOCUMENT_CATEGORY.OTHER]:      'Other',
 }
-
 export const DOCUMENT_CATEGORY_COLOURS = {
-  [DOCUMENT_CATEGORY.BROCHURE]:        'bg-amber-50 text-amber-700',
-  [DOCUMENT_CATEGORY.FLOOR_PLAN]:      'bg-blue-50 text-blue-700',
-  [DOCUMENT_CATEGORY.INVESTMENT_DECK]: 'bg-purple-50 text-purple-700',
-  [DOCUMENT_CATEGORY.OTHER]:           'bg-brand-100 text-brand-500',
+  [DOCUMENT_CATEGORY.MENU]:       'bg-amber-50 text-amber-700',
+  [DOCUMENT_CATEGORY.POLICY]:     'bg-brand-100 text-brand-500',
+  [DOCUMENT_CATEGORY.FLOOR_PLAN]: 'bg-blue-50 text-blue-700',
+  [DOCUMENT_CATEGORY.BROCHURE]:   'bg-purple-50 text-purple-700',
+  [DOCUMENT_CATEGORY.OTHER]:      'bg-brand-100 text-brand-500',
 }
 
 // ─── BLOG ────────────────────────────────────────────────────────────────────
