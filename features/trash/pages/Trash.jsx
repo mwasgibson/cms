@@ -7,16 +7,15 @@ import Button from '../../../components/Button'
 import Loader from '../../../components/Loader'
 import Modal from '../../../components/Modal'
 import { formatDate } from '../../../utils/formatters'
-import { UNIT_TYPE_LABELS, DOCUMENT_CATEGORY_LABELS, POST_STATUS_LABELS } from '../../../utils/constants'
+import { ROOM_TYPES_LABELS, DOCUMENT_CATEGORY_LABELS, POST_STATUS_LABELS } from '../../../utils/constants'
 
 // ─── Row labels per resource ─────────────────────────────────────────────────
 function getLabel(resource, record) {
   switch (resource) {
-    case 'units':     return `${record.name} (${UNIT_TYPE_LABELS[record.type] ?? record.type})`
-    case 'leads':     return `${record.name} — ${record.email}`
+    case 'rooms':     return `${record.name} (${ROOM_TYPES_LABELS[record.type] ?? record.type})`
+    case 'deals':     return `${record.name}`
     case 'documents': return `${record.title} (${DOCUMENT_CATEGORY_LABELS[record.category] ?? record.category})`
     case 'posts':     return `${record.title} [${POST_STATUS_LABELS[record.status] ?? record.status}]`
-    case 'projects':  return record.name
     default:          return `#${record.id}`
   }
 }
@@ -143,11 +142,10 @@ export default function Trash() {
 
       {trash && totalItems > 0 && (
         <div className="space-y-6">
-          <TrashSection title="Units"     resource="units"     records={trash.units}     onRestore={(r, rec) => setRestoring({ resource: r, record: rec })} onHardDelete={(r, rec) => setDeleting({ resource: r, record: rec })} canHardDelete={canHardDelete} />
-          <TrashSection title="Leads"     resource="leads"     records={trash.leads}     onRestore={(r, rec) => setRestoring({ resource: r, record: rec })} onHardDelete={(r, rec) => setDeleting({ resource: r, record: rec })} canHardDelete={canHardDelete} />
+          <TrashSection title="Rooms"     resource="rooms"     records={trash.rooms}     onRestore={(r, rec) => setRestoring({ resource: r, record: rec })} onHardDelete={(r, rec) => setDeleting({ resource: r, record: rec })} canHardDelete={canHardDelete} />
+          <TrashSection title="Deals"     resource="deals"     records={trash.deals}     onRestore={(r, rec) => setRestoring({ resource: r, record: rec })} onHardDelete={(r, rec) => setDeleting({ resource: r, record: rec })} canHardDelete={canHardDelete} />
           <TrashSection title="Documents" resource="documents" records={trash.documents} onRestore={(r, rec) => setRestoring({ resource: r, record: rec })} onHardDelete={(r, rec) => setDeleting({ resource: r, record: rec })} canHardDelete={canHardDelete} />
           <TrashSection title="Posts"     resource="posts"     records={trash.posts}     onRestore={(r, rec) => setRestoring({ resource: r, record: rec })} onHardDelete={(r, rec) => setDeleting({ resource: r, record: rec })} canHardDelete={canHardDelete} />
-          <TrashSection title="Projects"  resource="projects"  records={trash.projects}  onRestore={(r, rec) => setRestoring({ resource: r, record: rec })} onHardDelete={(r, rec) => setDeleting({ resource: r, record: rec })} canHardDelete={canHardDelete} />
         </div>
       )}
 

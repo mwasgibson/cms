@@ -44,3 +44,8 @@ export const deleteRoom = async (roomNumber) => {
   await http.delete(API.ROOM(roomNumber))
   auditLog.record('delete', 'rooms', roomNumber)
 }
+export const restoreRoom = async (id) => {
+  const result = unwrap(await http.patch(`${API.ROOM(id)}/restore`))
+  auditLog.record('restore', 'rooms', id)
+  return result
+}

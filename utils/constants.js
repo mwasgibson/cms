@@ -62,6 +62,25 @@ export const PERMISSIONS = {
   ],
 }
 
+// ─── ROOM ─────────────────────────────────────────────────────────────────────
+export const ROOM_TYPES = {
+  SINGLE:     'single',
+  STANDARD:   'standard',
+  DELUXE:     'deluxe',
+  DOUBLE:     'double',
+  SUITE:      'suite',
+  EXECUTIVE:  'executive'
+}
+
+export const ROOM_TYPE_LABELS = {
+  [ROOM_TYPES.SINGLE]:     'Single',
+  [ROOM_TYPES.STANDARD]:   'Standard',
+  [ROOM_TYPES.DELUXE]:     'Deluxe',
+  [ROOM_TYPES.DOUBLE]:     'Double',
+  [ROOM_TYPES.SUITE]:      'Suite',
+  [ROOM_TYPES.EXECUTIVE]:  'Executive',
+}
+
 // ─── DOCUMENT ────────────────────────────────────────────────────────────────
 export const DOCUMENT_CATEGORY = {
   MENU:       'menu',
