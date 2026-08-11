@@ -6,11 +6,9 @@ import Button from '../components/Button'
 
 const NAV_ITEMS = [
   { to: '/admin/dashboard',  label: 'Dashboard' },
-  { to: '/admin/units',      label: 'Units' },
-  { to: '/admin/projects',   label: 'Projects' },
-  { to: '/admin/leads',      label: 'Leads' },
+  { to: '/admin/rooms',      label: 'Rooms' },
+  { to: '/admin/deals',      label: 'Deals' },
   { to: '/admin/documents',  label: 'Documents' },
-  { to: '/admin/testimonials', label: 'Testimonials' },
   { to: '/admin/blog',       label: 'Blog' },
   { to: '/admin/content',    label: 'Content' },
   { to: '/admin/settings',   label: 'Settings' },
@@ -22,8 +20,9 @@ function SidebarContent({ onNavigate }) {
   return (
     <>
       <div className="border-b border-white/10 px-6 py-5">
-        <p className="font-display text-lg font-semibold text-white">Panda Towers</p>
-        <p className="text-xs text-brand-100/60">001 — Admin</p>
+        {/* TODO: swap in the hotel's actual name/branding here */}
+        <p className="font-display text-lg font-semibold text-white">Hotel Admin</p>
+        <p className="text-xs text-brand-100/60">Admin panel</p>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
@@ -47,7 +46,7 @@ function SidebarContent({ onNavigate }) {
 
       <div className="border-t border-white/10 p-3">
         <a
-          href="https://pandatowers.africa"
+          href="/" /* TODO: point this at the live hotel site's URL */
           target="_blank"
           rel="noreferrer"
           className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-brand-100/80 transition-colors hover:bg-white/5 hover:text-white"
@@ -117,7 +116,7 @@ export default function AdminLayout() {
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
             <span className="hidden text-sm text-brand-500 sm:inline">
-              {user?.name ?? user?.email}
+              {user?.fullname ?? user?.email}
             </span>
             <Button variant="ghost" onClick={handleLogout}>
               Sign out

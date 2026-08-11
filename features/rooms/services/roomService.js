@@ -1,5 +1,6 @@
-import { createResource } from '../../../lib/apiClient'
+import { http } from '../../../lib/apiClient'
 import { API } from '../../../utils/constants'
+import { auditLog } from '../../../lib/auditLog'
 
 /**
  * Hotel API contract (Express, not Laravel):
@@ -16,26 +17,30 @@ import { API } from '../../../utils/constants'
  *
  * Note: rooms are identified by room_number (not a numeric id) in the URL,
  * and there is no soft-delete/restore for rooms — delete is permanent.
+ *
+ * Like Deals, Rooms always talks to the real Express API regardless of the
+ * global VITE_USE_MOCKS flag — it's the other verified live integration.
  */
 
-const roomsMock = {
-  list: async () => [],
-  get: async () => null,
-  create: async (p) => ({ ...p }),
-  update: async (id, p) => ({ ...p }),
-  remove: async () => {},
+const unwrap = (res) => {
+  const d = res.data
+  return Array.isArray(d) ? d : (d?.data ?? d)
 }
 
-const resource = createResource('rooms', roomsMock, {
-  list:   () => API.ROOMS,
-  get:    (roomNumber) => API.ROOM(roomNumber),
-  create: () => API.ROOMS,
-  update: (roomNumber) => API.ROOM(roomNumber),
-  remove: (roomNumber) => API.ROOM(roomNumber),
-})
+export const listRooms  = async (params) => unwrap(await http.get(API.ROOMS, { params }))
+export const getRoom    = async (roomNumber) => unwrap(await http.get(API.ROOM(roomNumber)))
 
-export const listRooms  = (p) => resource.list(p)
-export const getRoom    = (roomNumber) => resource.get(roomNumber)
-export const createRoom = (d) => resource.create(d)
-export const updateRoom = (roomNumber, d) => resource.update(roomNumber, d)
-export const deleteRoom = (roomNumber) => resource.remove(roomNumber)
+export const createRoom = async (payload) => {
+  const result = unwrap(await http.post(API.ROOMS, payload))
+  auditLog.record('create', 'rooms', result.room_number ?? payload.room_number, payload)
+  return result
+}
+export const updateRoom = async (roomNumber, payload) => {
+  const result = unwrap(await http.put(API.ROOM(roomNumber), payload))
+  auditLog.record('update', 'rooms', roomNumber, payload)
+  return result
+}
+export const deleteRoom = async (roomNumber) => {
+  await http.delete(API.ROOM(roomNumber))
+  auditLog.record('delete', 'rooms', roomNumber)
+}

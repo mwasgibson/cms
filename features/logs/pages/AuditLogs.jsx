@@ -1,14 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Table from '../../../components/Table'
 import { auditLog } from '../../../lib/auditLog'
 import { AUDIT_ACTION_LABELS } from '../../../utils/constants'
 
 export default function AuditLogs() {
-  const [logs, setLogs] = useState([])
-
-  useEffect(() => {
-    setLogs(auditLog.all())
-  }, [])
+  const [logs] = useState(() => auditLog.all())
 
   const columns = [
     { key: 'timestamp', header: 'When', render: (row) => new Date(row.timestamp).toLocaleString() },
