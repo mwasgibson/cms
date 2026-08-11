@@ -29,8 +29,7 @@ export default function SeoSettingsForm({ initialValues, onSubmit }) {
     <form onSubmit={handleSubmit} className="rounded-lg border border-brand-100 bg-white shadow-sm p-6">
       <h2 className="font-display text-lg font-semibold text-brand-900">SEO</h2>
       <p className="mb-5 text-sm text-brand-500">
-        Meta tags used on the public site — these are the same fields already live on
-        pandatowers.africa, now editable here instead of hardcoded.
+        Meta tags used on the public site — these are the same fields already live, now editable here instead of hardcoded.
       </p>
 
       <div className="flex flex-col gap-4">
