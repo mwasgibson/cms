@@ -2,45 +2,94 @@ import { http } from '../../../lib/apiClient'
 import { API } from '../../../utils/constants'
 import { auditLog } from '../../../lib/auditLog'
 
-const TOKEN_KEY = 'token'
-
 /**
- * Auth always talks to the real hotel backend, regardless of VITE_USE_MOCKS.
- * Deals and Rooms are wired to the live API and need a real JWT to pass
- * authMiddleware — a mock token would just get rejected as invalid. Content,
- * Settings, and Blog can stay in mock/demo mode for their own data since they
- * never send this token anywhere; being logged in for real doesn't affect them.
+ * Authentication service
+ * ──────────────────────
+ * Authentication is handled by the hotel backend.
+ *
+ * The backend:
+ *   - Validates the user's credentials
+ *   - Creates the JWT
+ *   - Stores the JWT in an HTTP-only `token` cookie
+ *   - Expires the cookie after the configured lifetime
+ *
+ * The frontend never reads or stores the JWT.
+ * Axios sends the cookie automatically via `withCredentials: true`.
+ *
+ * The admin panel is restricted to users with the `admin` role.
  */
 
+/**
+ * Authenticate an admin user.
+ *
+ * The backend sets the HTTP-only authentication cookie when
+ * the credentials are valid. We then fetch the current user
+ * from the backend rather than storing the JWT ourselves.
+ */
 export async function login({ email, password }) {
-  // Hotel backend returns { message, role, token } — no embedded user object,
-  // and login succeeds for any valid account regardless of role. This admin
-  // panel is admin-only, so we reject non-admins here even though their
-  // credentials were valid against the hotel's own login.
-  const { data } = await http.post(API.LOGIN, { email, password })
+  const { data } = await http.post(API.LOGIN, {
+    email,
+    password,
+  })
+
+  // The hotel backend authenticates valid users regardless of role.
+  // The CMS itself is restricted to administrators.
   if (data.role !== 'admin') {
-    localStorage.removeItem(TOKEN_KEY)
-    throw Object.assign(new Error('This admin panel is restricted to hotel administrators.'), {
-      response: { data: { message: 'This admin panel is restricted to hotel administrators.' } },
-    })
+    // Ask the backend to clear the authentication cookie.
+    // The frontend cannot remove an HTTP-only cookie directly.
+    try {
+      await http.post(API.LOGOUT)
+    } catch {
+      // Ignore logout errors here. The original login succeeded,
+      // but this user is not allowed to access the admin panel.
+    }
+
+    throw Object.assign(
+      new Error(
+        'This admin panel is restricted to hotel administrators.',
+      ),
+      {
+        response: {
+          data: {
+            message:
+              'This admin panel is restricted to hotel administrators.',
+          },
+        },
+      },
+    )
   }
-  localStorage.setItem(TOKEN_KEY, data.token)
+
+  // The JWT is stored in the HTTP-only cookie by the backend.
+  // Fetch the authenticated user's information using that cookie.
   const user = await fetchCurrentUser()
+
   auditLog.record('login', 'auth', user?.id)
+
   return user
 }
 
+/**
+ * Log the current user out.
+ *
+ * The backend is responsible for clearing the HTTP-only
+ * authentication cookie.
+ */
 export async function logout() {
   try {
     await http.post(API.LOGOUT)
   } finally {
-    localStorage.removeItem(TOKEN_KEY)
+    // No localStorage cleanup is required.
+    // The JWT is stored in an HTTP-only cookie owned by the backend.
   }
 }
 
+/**
+ * Fetch the currently authenticated user.
+ *
+ * The browser automatically sends the HTTP-only `token` cookie
+ * with the request because the Axios client uses withCredentials.
+ */
 export async function fetchCurrentUser() {
   const { data } = await http.get(API.ME)
   return data
 }
-
-export const getToken = () => localStorage.getItem(TOKEN_KEY)
