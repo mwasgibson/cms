@@ -19,7 +19,7 @@ When a token is available, requests automatically include:
 
 - Authorization: Bearer <token>
 
-The token is stored in localStorage under pt_token.
+The token is stored in localStorage under token.
 
 ## Resource endpoints
 

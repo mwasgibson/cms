@@ -2,7 +2,7 @@ import { http } from '../../../lib/apiClient'
 import { API } from '../../../utils/constants'
 import { auditLog } from '../../../lib/auditLog'
 
-const TOKEN_KEY = 'pt_token'
+const TOKEN_KEY = 'token'
 
 /**
  * Auth always talks to the real hotel backend, regardless of VITE_USE_MOCKS.

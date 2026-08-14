@@ -10,7 +10,7 @@ This document captures the current frontend-side security expectations for the P
 
 ## Authentication and sessions
 
-- The app stores the auth token in localStorage under pt_token.
+- The app stores the auth token in localStorage under token.
 - Treat that token as sensitive and clear it on logout.
 - When the backend is moved to a production-grade session model, prefer HttpOnly cookies if the stack supports them.
 
