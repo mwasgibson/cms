@@ -1,37 +1,40 @@
 import { http } from '../../../lib/apiClient'
-import { restoreRoom }     from '../../rooms/services/roomService'
-import { restoreDocument } from '../../documents/services/documentService'
-import { restorePost }     from '../../blog/services/blogService'
-import { restoreDeal } from '../../deals/services/dealService'
 
 /**
- * Laravel API contract:
- *   GET /trash       -> { deals: [], documents: [], posts: [], projects: [], rooms: [] }
- *   All existing restore endpoints handle individual record restoration:
- *     PATCH /room/{id}/restore, /deals/{id}/restore, etc.
+ * Trash API contract (hotel backend):
+ *   GET    /trash       -> deleted trash records
+ *   GET    /trash/:id   -> one trash record
+ *   PATCH  /trash/:id/restore
+ *   DELETE /trash/:id  -> permanently delete the trash record
  *
- * Hard-delete (permanent) — admin only:
- *   DELETE /deals/{id}/force
- *   DELETE /documents/{id}/force
- *   DELETE /posts/{id}/force
- *   DELETE /rooms/{id}/force
+ * The backend owns restore behavior. The CMS uses the trash item's id,
+ * not the original resource id, when restoring or permanently deleting.
  */
 
-// ─── Aggregate all soft-deleted records from all features ─────────────────────
 export async function getTrash() {
   const { data } = await http.get('/trash')
   return data
 }
 
-// ─── Restore helpers (delegate to each feature's service) ─────────────────────
-export const restoreTrashItem = {
-  deals:     (id) => restoreDeal(id),
-  documents: (id) => restoreDocument(id),
-  posts:     (id) => restorePost(id),
-  rooms:     (id) => restoreRoom(id),
+export async function getTrashItem(id) {
+  const { data } = await http.get(`/trash/${id}`)
+  return data
 }
 
-// ─── Hard delete (permanent) — admin only ─────────────────────────────────────
-export async function hardDelete(resource, id) {
-  await http.delete(`/${resource}/${id}/force`)
+export async function restoreTrashItem(id) {
+  const { data } = await http.patch(`/trash/${id}/restore`)
+  return data
+}
+
+export async function hardDelete(id) {
+  const { data } = await http.delete(`/trash/${id}`)
+  return data
+}
+
+export async function permanentlyDelete(id) {
+  return hardDelete(id)
+}
+
+export function getTrashItemId(item) {
+  return item?.id
 }
