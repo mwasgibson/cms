@@ -44,3 +44,8 @@ export const deleteDocument = async (id) => {
   await http.delete(API.DOCUMENT(id))
   auditLog.record('delete', 'documents', id)
 }
+export const restoreDocument = async (id) => {
+  const result = unwrap(await http.patch(`${API.DOCUMENT(id)}/restore`))
+  auditLog.record('restore', 'documents', id)
+  return result
+}

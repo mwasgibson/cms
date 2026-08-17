@@ -72,7 +72,7 @@ export const ROOM_TYPES = {
   EXECUTIVE:  'executive'
 }
 
-export const ROOM_TYPE_LABELS = {
+export const ROOM_TYPES_LABELS = {
   [ROOM_TYPES.SINGLE]:     'Single',
   [ROOM_TYPES.STANDARD]:   'Standard',
   [ROOM_TYPES.DELUXE]:     'Deluxe',

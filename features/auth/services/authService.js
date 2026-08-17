@@ -19,29 +19,17 @@ import { auditLog } from '../../../lib/auditLog'
  * The admin panel is restricted to users with the `admin` role.
  */
 
-/**
- * Authenticate an admin user.
- *
- * The backend sets the HTTP-only authentication cookie when
- * the credentials are valid. We then fetch the current user
- * from the backend rather than storing the JWT ourselves.
- */
 export async function login({ email, password }) {
   const { data } = await http.post(API.LOGIN, {
     email,
     password,
   })
 
-  // The hotel backend authenticates valid users regardless of role.
-  // The CMS itself is restricted to administrators.
   if (data.role !== 'admin') {
-    // Ask the backend to clear the authentication cookie.
-    // The frontend cannot remove an HTTP-only cookie directly.
     try {
       await http.post(API.LOGOUT)
     } catch {
-      // Ignore logout errors here. The original login succeeded,
-      // but this user is not allowed to access the admin panel.
+      // Ignore logout errors.
     }
 
     throw Object.assign(
@@ -59,8 +47,6 @@ export async function login({ email, password }) {
     )
   }
 
-  // The JWT is stored in the HTTP-only cookie by the backend.
-  // Fetch the authenticated user's information using that cookie.
   const user = await fetchCurrentUser()
 
   auditLog.record('login', 'auth', user?.id)
@@ -68,28 +54,24 @@ export async function login({ email, password }) {
   return user
 }
 
-/**
- * Log the current user out.
- *
- * The backend is responsible for clearing the HTTP-only
- * authentication cookie.
- */
 export async function logout() {
   try {
     await http.post(API.LOGOUT)
   } finally {
-    // No localStorage cleanup is required.
-    // The JWT is stored in an HTTP-only cookie owned by the backend.
+    // JWT is stored in an HTTP-only cookie.
+    // The backend is responsible for clearing it.
   }
 }
 
-/**
- * Fetch the currently authenticated user.
- *
- * The browser automatically sends the HTTP-only `token` cookie
- * with the request because the Axios client uses withCredentials.
- */
 export async function fetchCurrentUser() {
   const { data } = await http.get(API.ME)
   return data
 }
+
+/**
+ * Kept for compatibility with existing CMS code.
+ *
+ * The JWT is now stored in an HTTP-only cookie, so JavaScript
+ * cannot and should not read it.
+ */
+export const getToken = () => null

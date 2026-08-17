@@ -1,36 +1,48 @@
 import { useEffect, useState, useCallback } from 'react'
 import { AuthContext } from './auth-context'
-import { getToken, fetchCurrentUser, login as loginRequest, logout as logoutRequest } from '../services/authService'
+import {
+  fetchCurrentUser,
+  login as loginRequest,
+  logout as logoutRequest,
+} from '../services/authService'
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  // If there's no token, we already know there's nothing to check — start "not loading".
-  const [loading, setLoading] = useState(() => !!getToken())
+  const [loading, setLoading] = useState(true)
 
+  // Restore the authenticated session when the app starts.
+  // The JWT is stored in an HTTP-only cookie, so we cannot
+  // check it from JavaScript. Instead, ask the backend.
   useEffect(() => {
-    if (!loading) return
-
     let cancelled = false
 
     fetchCurrentUser()
       .then((fetchedUser) => {
-        if (!cancelled) setUser(fetchedUser)
+        if (!cancelled) {
+          setUser(fetchedUser)
+        }
       })
       .catch(() => {
-        if (!cancelled) setUser(null)
+        if (!cancelled) {
+          setUser(null)
+        }
       })
       .finally(() => {
-        if (!cancelled) setLoading(false)
+        if (!cancelled) {
+          setLoading(false)
+        }
       })
 
     return () => {
       cancelled = true
     }
-  }, [loading])
+  }, [])
 
   const login = useCallback(async (credentials) => {
     const loggedInUser = await loginRequest(credentials)
+
     setUser(loggedInUser)
+
     return loggedInUser
   }, [])
 
@@ -40,7 +52,15 @@ export function AuthProvider({ children }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+        isAuthenticated: !!user,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )
