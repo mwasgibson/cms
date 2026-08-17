@@ -47,7 +47,7 @@ export default function AppRoutes() {
         <Route path="blog/:id/edit"          element={<EditPost />} />
         <Route path="content"                element={<Content />} />
         <Route path="settings"               element={<Settings />} />
-        <Route path="logs"                   element={<AuditLogs />} />
+        <Route path="audit-logs"             element={<AuditLogs />} />
         <Route path="trash"                  element={<Trash />} />
       </Route>
 
