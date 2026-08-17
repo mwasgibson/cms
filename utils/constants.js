@@ -30,9 +30,6 @@ export const ROUTES = {
 
 export const API = {
   // ─── AUTH ──────────────────────────────────────────────────────────────────
-  // Authentication uses the HTTP-only token cookie supplied by the
-  // hotel backend. The CMS does not store the token itself.
-
   LOGIN: "/auth/login",
   LOGOUT: "/auth/logout",
   ME: "/auth/profile",
@@ -51,27 +48,23 @@ export const API = {
   DOCUMENT: (id) => `/documents/${id}`,
 
   // ─── BLOG ─────────────────────────────────────────────────────────────────
-  // These endpoints will be implemented in the hotel Express backend.
-
-  POSTS: "/posts",
-  POST: (id) => `/posts/${id}`,
+  // Hotel backend routes are mounted under /blog.
+  POSTS: "/blog",
+  POSTS_ADMIN: "/blog/admin",
+  POST: (id) => `/blog/${id}`,
+  POST_ADMIN: (id) => `/blog/admin/${id}`,
 
   // ─── CONTENT ──────────────────────────────────────────────────────────────
-  // These endpoints will be implemented in the hotel Express backend.
-
+  // Kept here for the existing Content feature. It is intentionally not
+  // modified as part of the Blog integration.
   CONTENT: "/content",
   CONTENT_SECTION: (section) => `/content/${section.replace(/_/g, "-")}`,
 
   // ─── SETTINGS ─────────────────────────────────────────────────────────────
-  // These endpoints will be implemented in the hotel Express backend.
-
   SETTINGS: "/settings",
   SETTINGS_SECTION: (section) => `/settings/${section}`,
 
   // ─── AUDIT LOGS ───────────────────────────────────────────────────────────
-  // Backend audit endpoints will be added later.
-  // Authentication identifies the acting user through req.user.
-
   AUDIT_LOGS: "/audit-logs",
 
   // ─── MEDIA ────────────────────────────────────────────────────────────────
@@ -79,11 +72,6 @@ export const API = {
 };
 
 // ─── PERMISSIONS ─────────────────────────────────────────────────────────────
-// The hotel backend currently uses the roles:
-// admin, receptionist, guest.
-//
-// The CMS is restricted to administrators.
-
 export const ROLES = {
   ADMIN: "admin",
 };
@@ -151,13 +139,9 @@ export const DOCUMENT_CATEGORY_LABELS = {
 
 export const DOCUMENT_CATEGORY_COLOURS = {
   [DOCUMENT_CATEGORY.MENU]: "bg-amber-50 text-amber-700",
-
   [DOCUMENT_CATEGORY.POLICY]: "bg-brand-100 text-brand-500",
-
   [DOCUMENT_CATEGORY.FLOOR_PLAN]: "bg-blue-50 text-blue-700",
-
   [DOCUMENT_CATEGORY.BROCHURE]: "bg-purple-50 text-purple-700",
-
   [DOCUMENT_CATEGORY.OTHER]: "bg-brand-100 text-brand-500",
 };
 
@@ -166,17 +150,19 @@ export const DOCUMENT_CATEGORY_COLOURS = {
 export const POST_STATUS = {
   DRAFT: "draft",
   PUBLISHED: "published",
+  ARCHIVED: "archived",
 };
 
 export const POST_STATUS_LABELS = {
   [POST_STATUS.DRAFT]: "Draft",
   [POST_STATUS.PUBLISHED]: "Published",
+  [POST_STATUS.ARCHIVED]: "Archived",
 };
 
 export const POST_STATUS_COLOURS = {
   [POST_STATUS.DRAFT]: "bg-brand-100 text-brand-500",
-
   [POST_STATUS.PUBLISHED]: "bg-emerald-50 text-emerald-700",
+  [POST_STATUS.ARCHIVED]: "bg-slate-100 text-slate-700",
 };
 
 // ─── AUDIT ───────────────────────────────────────────────────────────────────
