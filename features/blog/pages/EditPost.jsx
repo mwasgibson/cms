@@ -34,10 +34,10 @@ export default function EditPost() {
     setDeleting(true)
     try {
       await deletePost(id)
-      showToast('Post deleted', 'success')
+      showToast('Post moved to trash', 'success')
       navigate('/admin/blog')
     } catch {
-      showToast('Could not delete this post. Try again.', 'error')
+      showToast('Could not move this post to trash. Try again.', 'error')
     } finally {
       setDeleting(false)
       setConfirmOpen(false)
@@ -65,20 +65,20 @@ export default function EditPost() {
       <Modal
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
-        title="Delete this post?"
+        title="Move this post to trash?"
         footer={
           <>
             <Button variant="ghost" onClick={() => setConfirmOpen(false)}>
               Cancel
             </Button>
             <Button variant="danger" loading={deleting} onClick={handleDelete}>
-              Delete
+              Move to trash
             </Button>
           </>
         }
       >
         <p className="text-sm text-brand-500">
-          This removes <strong>{post.title}</strong> permanently. This can't be undone.
+          <strong>{post.title}</strong> will be moved to Trash. You can restore it from there.
         </p>
       </Modal>
     </div>
