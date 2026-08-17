@@ -23,7 +23,7 @@ npm run dev
 
 The frontend expects these Vite variables:
 
-- VITE_API_URL: API base URL, for example http://localhost:8000/api
+- VITE_API_URL: API base URL, for example `http://localhost:8000/api`
 - VITE_USE_MOCKS: Set to true to use mock data and localStorage by default
 
 ## Mock mode
