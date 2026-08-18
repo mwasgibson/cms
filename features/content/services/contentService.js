@@ -13,49 +13,20 @@ const EMPTY_CONTENT = {
 function normalizeContent(raw) {
   if (!raw) return EMPTY_CONTENT;
 
-  if (!Array.isArray(raw) && typeof raw === "object") {
-    const source =
-      raw.content &&
-      typeof raw.content === "object" &&
-      !Array.isArray(raw.content)
-        ? raw.content
-        : raw.data && typeof raw.data === "object" && !Array.isArray(raw.data)
-          ? raw.data
-          : raw;
-
-    if (
-      source.home ||
-      source.navigation ||
-      source.contact ||
-      source.footer ||
-      source.seo
-    ) {
-      return {
-        ...EMPTY_CONTENT,
-        ...source,
-        home: {
-          ...EMPTY_CONTENT.home,
-          ...(source.home || {}),
-        },
-        navigation: {
-          ...EMPTY_CONTENT.navigation,
-          ...(source.navigation || {}),
-        },
-        contact: {
-          ...EMPTY_CONTENT.contact,
-          ...(source.contact || {}),
-        },
-        footer: {
-          ...EMPTY_CONTENT.footer,
-          ...(source.footer || {}),
-        },
-        seo: {
-          ...EMPTY_CONTENT.seo,
-          ...(source.seo || {}),
-        },
-      };
-    }
-  }
+  const source =
+    raw.content &&
+    typeof raw.content === "object" &&
+    !Array.isArray(raw.content)
+      ? raw.content
+      : raw.data &&
+          typeof raw.data === "object" &&
+          !Array.isArray(raw.data)
+        ? raw.data
+        : !Array.isArray(raw) &&
+            typeof raw === "object" &&
+            !Array.isArray(raw.records)
+          ? raw
+          : {};
 
   const records = Array.isArray(raw)
     ? raw
@@ -65,67 +36,47 @@ function normalizeContent(raw) {
         ? raw.data
         : [];
 
-  const grouped = {};
+  const grouped = {
+    ...EMPTY_CONTENT,
+    ...source,
+    home: {
+      ...EMPTY_CONTENT.home,
+      ...(source.home || {}),
+    },
+    navigation: {
+      ...EMPTY_CONTENT.navigation,
+      ...(source.navigation || {}),
+    },
+    contact: {
+      ...EMPTY_CONTENT.contact,
+      ...(source.contact || {}),
+    },
+    footer: {
+      ...EMPTY_CONTENT.footer,
+      ...(source.footer || {}),
+    },
+    seo: {
+      ...EMPTY_CONTENT.seo,
+      ...(source.seo || {}),
+    },
+  };
 
   for (const record of records) {
     if (!record || typeof record !== "object") continue;
 
-    const section = record.section || record.slug || record.page;
+    const page = record.page || record.slug || record.section;
     const key = record.key || record.field || record.name;
 
-    if (!section) continue;
+    if (!page || !key) continue;
 
-    if (
-      record.data &&
-      typeof record.data === "object" &&
-      !Array.isArray(record.data)
-    ) {
-      grouped[section] = {
-        ...(grouped[section] || {}),
-        ...record.data,
-      };
-
-      continue;
+    if (!grouped[page] || typeof grouped[page] !== "object") {
+      grouped[page] = {};
     }
 
-    if (key) {
-      if (!grouped[section]) {
-        grouped[section] = {};
-      }
-
-      grouped[section][key] = record.value ?? record.content ?? "";
-    } else if (record.value !== undefined) {
-      grouped[section] = record.value;
-    }
+    grouped[page][key] = record.value ?? record.content ?? "";
   }
 
-  return {
-    ...EMPTY_CONTENT,
-    ...grouped,
-    home: {
-      ...EMPTY_CONTENT.home,
-      ...(grouped.home || {}),
-    },
-    navigation: {
-      ...EMPTY_CONTENT.navigation,
-      ...(grouped.navigation || {}),
-    },
-
-    contact: {
-      ...EMPTY_CONTENT.contact,
-      ...(grouped.contact || {}),
-    },
-
-    footer: {
-      ...EMPTY_CONTENT.footer,
-      ...(grouped.footer || {}),
-    },
-
-    seo: {
-      ...EMPTY_CONTENT.seo,
-      ...(grouped.seo || {}),
-    },
-  };
+  return grouped;
 }
 
 export async function getContent() {
@@ -147,7 +98,9 @@ export async function getPageContent(page) {
 
   const { data } = await api.get(`/content/${encodeURIComponent(page)}`);
 
-  return data;
+  const normalized = normalizeContent(data);
+
+  return normalized?.[page] ?? {};
 }
 
 export async function createContent(payload) {
