@@ -26,7 +26,13 @@ function normalizeContent(raw) {
       ? raw.data
       : Array.isArray(raw)
         ? raw
-        : [];
+        : raw.data && typeof raw.data === "object" && !Array.isArray(raw.data)
+          ? raw.data
+          : !Array.isArray(raw) &&
+              typeof raw === "object" &&
+              !Array.isArray(raw.records)
+            ? raw
+            : {};
 
   const grouped = {
     ...EMPTY_CONTENT,
@@ -77,6 +83,7 @@ function normalizeContent(raw) {
     const value = record.value ?? record.content ?? "";
 
     grouped[page][key] = value;
+    grouped[page][key] = record.value ?? record.content ?? "";
   }
 
   return grouped;
