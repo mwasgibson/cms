@@ -13,119 +13,73 @@ const EMPTY_CONTENT = {
 function normalizeContent(raw) {
   if (!raw) return EMPTY_CONTENT;
 
-  if (!Array.isArray(raw) && typeof raw === "object") {
-    const source =
-      raw.content &&
-      typeof raw.content === "object" &&
-      !Array.isArray(raw.content)
-        ? raw.content
-        : raw.data && typeof raw.data === "object" && !Array.isArray(raw.data)
-          ? raw.data
-          : raw;
+  const source =
+    raw.content &&
+    typeof raw.content === "object" &&
+    !Array.isArray(raw.content)
+      ? raw.content
+      : {};
 
-    if (
-      source.home ||
-      source.navigation ||
-      source.contact ||
-      source.footer ||
-      source.seo
-    ) {
-      return {
-        ...EMPTY_CONTENT,
-        ...source,
-        home: {
-          ...EMPTY_CONTENT.home,
-          ...(source.home || {}),
-        },
-        navigation: {
-          ...EMPTY_CONTENT.navigation,
-          ...(source.navigation || {}),
-        },
-        contact: {
-          ...EMPTY_CONTENT.contact,
-          ...(source.contact || {}),
-        },
-        footer: {
-          ...EMPTY_CONTENT.footer,
-          ...(source.footer || {}),
-        },
-        seo: {
-          ...EMPTY_CONTENT.seo,
-          ...(source.seo || {}),
-        },
-      };
-    }
-  }
-
-  const records = Array.isArray(raw)
-    ? raw
-    : Array.isArray(raw.records)
-      ? raw.records
-      : Array.isArray(raw.data)
-        ? raw.data
+  const records = Array.isArray(raw.records)
+    ? raw.records
+    : Array.isArray(raw.data)
+      ? raw.data
+      : Array.isArray(raw)
+        ? raw
         : [];
 
-  const grouped = {};
-
-  for (const record of records) {
-    if (!record || typeof record !== "object") continue;
-
-    const section = record.section || record.slug || record.page;
-    const key = record.key || record.field || record.name;
-
-    if (!section) continue;
-
-    if (
-      record.data &&
-      typeof record.data === "object" &&
-      !Array.isArray(record.data)
-    ) {
-      grouped[section] = {
-        ...(grouped[section] || {}),
-        ...record.data,
-      };
-
-      continue;
-    }
-
-    if (key) {
-      if (!grouped[section]) {
-        grouped[section] = {};
-      }
-
-      grouped[section][key] = record.value ?? record.content ?? "";
-    } else if (record.value !== undefined) {
-      grouped[section] = record.value;
-    }
-  }
-
-  return {
+  const grouped = {
     ...EMPTY_CONTENT,
-    ...grouped,
+    ...source,
+
     home: {
       ...EMPTY_CONTENT.home,
-      ...(grouped.home || {}),
+      ...(source.home || {}),
     },
+
     navigation: {
       ...EMPTY_CONTENT.navigation,
-      ...(grouped.navigation || {}),
+      ...(source.navigation || {}),
     },
 
     contact: {
       ...EMPTY_CONTENT.contact,
-      ...(grouped.contact || {}),
+      ...(source.contact || {}),
     },
 
     footer: {
       ...EMPTY_CONTENT.footer,
-      ...(grouped.footer || {}),
+      ...(source.footer || {}),
     },
 
     seo: {
       ...EMPTY_CONTENT.seo,
-      ...(grouped.seo || {}),
+      ...(source.seo || {}),
     },
   };
+
+  // Database records are the source of truth.
+  // Records are mapped into their page object so the
+  // Content.jsx fields can read them correctly.
+  for (const record of records) {
+    if (!record || typeof record !== "object") continue;
+
+    const page = record.page || record.slug || record.section;
+
+    const key = record.key || record.field || record.name;
+
+    if (!page || !key) continue;
+
+    if (!grouped[page] || typeof grouped[page] !== "object") {
+      grouped[page] = {};
+    }
+
+    const value = record.value ?? record.content ?? "";
+
+    grouped[page][key] = value;
+  }
+
+  return grouped;
 }
 
 export async function getContent() {
@@ -147,7 +101,9 @@ export async function getPageContent(page) {
 
   const { data } = await api.get(`/content/${encodeURIComponent(page)}`);
 
-  return data;
+  const normalized = normalizeContent(data);
+
+  return normalized?.[page] ?? {};
 }
 
 export async function createContent(payload) {
@@ -205,12 +161,12 @@ export async function updateSection(section, payload = {}) {
 
   const { data } = await api.get("/content");
 
-  const records = Array.isArray(data)
-    ? data
-    : Array.isArray(data?.records)
-      ? data.records
-      : Array.isArray(data?.data)
-        ? data.data
+  const records = Array.isArray(data?.records)
+    ? data.records
+    : Array.isArray(data?.data)
+      ? data.data
+      : Array.isArray(data)
+        ? data
         : [];
 
   const page = payload.page || section;
