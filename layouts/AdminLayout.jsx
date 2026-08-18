@@ -1,31 +1,33 @@
-import { useState } from 'react'
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { Menu, X, ExternalLink } from 'lucide-react'
-import { useAuth } from '../features/auth/hooks/useAuth'
-import Button from '../components/Button'
+import { useState } from "react";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Menu, X, ExternalLink } from "lucide-react";
+import { useAuth } from "../features/auth/hooks/useAuth";
+import Button from "../components/Button";
 
 const NAV_ITEMS = [
-  { to: '/admin/dashboard',  label: 'Dashboard' },
-  { to: '/admin/rooms',      label: 'Rooms' },
-  { to: '/admin/deals',      label: 'Deals' },
-  { to: '/admin/documents',  label: 'Documents' },
-  { to: '/admin/blog',       label: 'Blog' },
-  { to: '/admin/content',    label: 'Content' },
-  { to: '/admin/settings',   label: 'Settings' },
-  { to: '/admin/audit-logs', label: 'Audit Logs' },
-  { to: '/admin/trash',      label: 'Trash' },
-]
+  { to: "/admin/dashboard", label: "Dashboard" },
+  { to: "/admin/rooms", label: "Rooms" },
+  { to: "/admin/deals", label: "Deals" },
+  { to: "/admin/documents", label: "Documents" },
+  { to: "/admin/blog", label: "Blog" },
+  { to: "/admin/content", label: "Content" },
+  { to: "/admin/settings", label: "Settings" },
+  { to: "/admin/audit-logs", label: "Audit Logs" },
+  { to: "/admin/trash", label: "Trash" },
+];
 
 function SidebarContent({ onNavigate }) {
   return (
     <>
       <div className="border-b border-white/10 px-6 py-5">
         {/* TODO: swap in the hotel's actual name/branding here */}
-        <p className="font-display text-lg font-semibold text-white">Hotel Admin</p>
+        <p className="font-display text-lg font-semibold text-white">
+          Hotel Admin
+        </p>
         <p className="text-xs text-brand-100/60">Admin panel</p>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 fixed">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
@@ -34,8 +36,8 @@ function SidebarContent({ onNavigate }) {
             className={({ isActive }) =>
               `block rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-accent-500 text-white'
-                  : 'text-brand-100/80 hover:bg-white/5 hover:text-white'
+                  ? "bg-accent-500 text-white"
+                  : "text-brand-100/80 hover:bg-white/5 hover:text-white"
               }`
             }
           >
@@ -56,22 +58,23 @@ function SidebarContent({ onNavigate }) {
         </a>
       </div>
     </>
-  )
+  );
 }
 
 export default function AdminLayout() {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
-    await logout()
-    navigate('/login')
-  }
+    await logout();
+    navigate("/login");
+  };
 
   const currentLabel =
-    NAV_ITEMS.find((item) => location.pathname.startsWith(item.to))?.label ?? ''
+    NAV_ITEMS.find((item) => location.pathname.startsWith(item.to))?.label ??
+    "";
 
   return (
     <div className="min-h-screen bg-brand-50 lg:flex">
@@ -128,5 +131,5 @@ export default function AdminLayout() {
         </main>
       </div>
     </div>
-  )
+  );
 }
