@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Loader from "../../../components/Loader";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
@@ -54,10 +54,6 @@ function useSectionForm(initial, section, label, onSave) {
   const [saving, setSaving] = useState(false);
 
   const { showToast } = useToast();
-
-  useEffect(() => {
-    setForm(initial || {});
-  }, [initial]);
 
   const set = (key) => (event) => {
     setForm((prev) => ({

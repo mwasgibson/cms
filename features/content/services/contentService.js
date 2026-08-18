@@ -13,26 +13,36 @@ const EMPTY_CONTENT = {
 function normalizeContent(raw) {
   if (!raw) return EMPTY_CONTENT;
 
-  const source =
+  let source = {};
+  let records = [];
+
+  if (
     raw.content &&
     typeof raw.content === "object" &&
     !Array.isArray(raw.content)
-      ? raw.content
-      : {};
+  ) {
+    source = raw.content;
+  } else if (
+    raw.data &&
+    typeof raw.data === "object" &&
+    !Array.isArray(raw.data)
+  ) {
+    source = raw.data;
+  } else if (!Array.isArray(raw) && typeof raw === "object") {
+    source = raw;
+  }
 
-  const records = Array.isArray(raw.records)
-    ? raw.records
-    : Array.isArray(raw.data)
-      ? raw.data
-      : Array.isArray(raw)
-        ? raw
-        : raw.data && typeof raw.data === "object" && !Array.isArray(raw.data)
-          ? raw.data
-          : !Array.isArray(raw) &&
-              typeof raw === "object" &&
-              !Array.isArray(raw.records)
-            ? raw
-            : {};
+  if (Array.isArray(raw)) {
+    records = raw;
+  } else if (Array.isArray(raw.records)) {
+    records = raw.records;
+  } else if (Array.isArray(raw.data)) {
+    records = raw.data;
+  } else if (Array.isArray(raw.content)) {
+    records = raw.content;
+  } else if (source && Array.isArray(source.records)) {
+    records = source.records;
+  }
 
   const grouped = {
     ...EMPTY_CONTENT,
@@ -64,14 +74,10 @@ function normalizeContent(raw) {
     },
   };
 
-  // Database records are the source of truth.
-  // Records are mapped into their page object so the
-  // Content.jsx fields can read them correctly.
   for (const record of records) {
     if (!record || typeof record !== "object") continue;
 
     const page = record.page || record.slug || record.section;
-
     const key = record.key || record.field || record.name;
 
     if (!page || !key) continue;
@@ -80,13 +86,48 @@ function normalizeContent(raw) {
       grouped[page] = {};
     }
 
-    const value = record.value ?? record.content ?? "";
+    let value = record.value ?? record.content ?? "";
+
+    if (record.type === "json" && typeof value === "string") {
+      try {
+        value = JSON.parse(value);
+      } catch {
+        // Keep the original value if it is not valid JSON.
+      }
+    }
 
     grouped[page][key] = value;
-    grouped[page][key] = record.value ?? record.content ?? "";
   }
 
   return grouped;
+}
+
+function serializeValue(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  if (typeof value === "object") {
+    return JSON.stringify(value);
+  }
+
+  return String(value);
+}
+
+function getContentType(value) {
+  if (typeof value === "boolean") {
+    return "boolean";
+  }
+
+  if (typeof value === "number") {
+    return "number";
+  }
+
+  if (value !== null && typeof value === "object") {
+    return "json";
+  }
+
+  return "text";
 }
 
 export async function getContent() {
@@ -118,12 +159,15 @@ export async function createContent(payload) {
     return mockUpdateSection(payload?.section, payload);
   }
 
+  const value = payload.value ?? "";
+  const type = payload.type || getContentType(value);
+
   const normalizedPayload = {
     page: payload.page,
     section: payload.section,
     key: payload.key,
-    value: payload.value ?? "",
-    type: payload.type || "text",
+    value: serializeValue(value),
+    type,
   };
 
   const { data } = await api.post("/content", normalizedPayload);
@@ -136,12 +180,15 @@ export async function updateContent(id, payload) {
     return mockUpdateSection(payload?.section, payload);
   }
 
+  const value = payload.value ?? "";
+  const type = payload.type || getContentType(value);
+
   const normalizedPayload = {
     page: payload.page,
     section: payload.section,
     key: payload.key,
-    value: payload.value ?? "",
-    type: payload.type || "text",
+    value: serializeValue(value),
+    type,
   };
 
   const { data } = await api.put(`/content/${id}`, normalizedPayload);
@@ -174,7 +221,9 @@ export async function updateSection(section, payload = {}) {
       ? data.data
       : Array.isArray(data)
         ? data
-        : [];
+        : Array.isArray(data?.content)
+          ? data.content
+          : [];
 
   const page = payload.page || section;
 
@@ -200,21 +249,16 @@ export async function updateSection(section, payload = {}) {
         (record) =>
           record?.page === page &&
           record?.section === section &&
-          record?.key === key,
+          (record?.key === key || record?.content_key === key),
       );
 
-      const contentType =
-        typeof value === "boolean"
-          ? "boolean"
-          : typeof value === "number"
-            ? "number"
-            : "text";
+      const contentType = getContentType(value);
 
       const recordPayload = {
         page,
         section,
         key,
-        value: value === null || value === undefined ? "" : String(value),
+        value: serializeValue(value),
         type: contentType,
       };
 
