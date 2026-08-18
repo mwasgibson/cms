@@ -18,7 +18,7 @@ const NAV_ITEMS = [
 
 function SidebarContent({ onNavigate }) {
   return (
-    <>
+    <div className="flex h-full min-h-0 flex-col">
       <div className="border-b border-white/10 px-6 py-5">
         {/* TODO: swap in the hotel's actual name/branding here */}
         <p className="font-display text-lg font-semibold text-white">
@@ -27,7 +27,7 @@ function SidebarContent({ onNavigate }) {
         <p className="text-xs text-brand-100/60">Admin panel</p>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 fixed">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
@@ -57,7 +57,7 @@ function SidebarContent({ onNavigate }) {
           View live site
         </a>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -77,9 +77,9 @@ export default function AdminLayout() {
     "";
 
   return (
-    <div className="min-h-screen bg-brand-50 lg:flex">
+    <div className="min-h-screen bg-brand-50">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 flex-col bg-brand-700 lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-brand-700 lg:flex">
         <SidebarContent />
       </aside>
 
@@ -103,7 +103,7 @@ export default function AdminLayout() {
         </div>
       )}
 
-      <div className="flex flex-1 flex-col lg:min-w-0">
+      <div className="flex min-h-screen flex-col lg:ml-64 lg:min-w-0">
         <header className="flex items-center justify-between border-b border-brand-100 bg-white px-4 py-4 sm:px-6">
           <div className="flex items-center gap-3">
             <button
