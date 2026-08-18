@@ -2,33 +2,9 @@ import api from '../../../app/api'
 import { shouldUseMocks } from '../../../utils/mockMode'
 import { mockGetContent, mockUpdateSection } from './mockContent'
 
-/**
- * CMS website content API.
- *
- * The content resource is owned by the CMS and stores website copy as
- * page/section/key/value records in the hotel backend database.
- *
- * GET    /content          -> all content records
- * GET    /content/:page    -> content for one page
- * POST   /content          -> create a content record
- * PUT    /content/:id      -> update a content record
- * DELETE /content/:id      -> remove a content record
- */
-
 const EMPTY_CONTENT = {
-  hero: {
-    headline: '',
-    subheadline: '',
-    cta_primary: '',
-    cta_secondary: '',
-    badge: '',
-  },
-  about: {
-    tagline: '',
-    developer_description: '',
-    mission: '',
-    vision: '',
-  },
+  hero: { headline: '', subheadline: '', cta_primary: '', cta_secondary: '', badge: '' },
+  about: { tagline: '', developer_description: '', mission: '', vision: '' },
   investment_calculator: {},
   payment_plans: {},
   project_specs: {},
@@ -38,17 +14,14 @@ const EMPTY_CONTENT = {
 }
 
 /**
- * The mock content service already returns the shape consumed by Content.jsx.
- * The real backend can return either that shape or normalized records such as:
- *   { section: 'hero', key: 'headline', value: '...' }
- *
- * Keep that API difference out of the page component. React should not have to
- * play detective every time the backend changes its response envelope.
+ * Normalizes the real API response to the object shape consumed by Content.jsx.
+ * The backend may return either grouped sections or page/section/key/value
+ * records. Keeping that translation here prevents undefined section crashes in
+ * the React page.
  */
 function normalizeContent(raw) {
   if (!raw) return EMPTY_CONTENT
 
-  // Already in the shape expected by the editor.
   if (!Array.isArray(raw) && typeof raw === 'object') {
     const source = raw.data && !Array.isArray(raw.data) ? raw.data : raw
     if (source.hero || source.about || source.faq || source.seo) {
@@ -70,6 +43,28 @@ function normalizeContent(raw) {
       ? raw.data
       : []
 
+  const grouped = {}
+
+  for (const record of records) {
+    if (!record || typeof record !== 'object') continue
+
+    const section = record.section || record.slug || record.page
+    const key = record.key || record.field || record.name
+    if (!section) continue
+
+    if (record.data && typeof record.data === 'object' && !Array.isArray(record.data)) {
+      grouped[section] = { ...(grouped[section] || {}), ...record.data }
+      continue
+    }
+
+    if (key) {
+      if (!grouped[section]) grouped[section] = {}
+      grouped[section][key] = record.value ?? record.content ?? ''
+    } else if (record.value !== undefined) {
+      grouped[section] = record.value
+    }
+  }
+
   const result = {
     ...EMPTY_CONTENT,
     hero: { ...EMPTY_CONTENT.hero },
@@ -80,30 +75,6 @@ function normalizeContent(raw) {
     faq: [],
     track_record: [],
     seo: {},
-  }
-
-  const grouped = {}
-
-  for (const record of records) {
-    if (!record || typeof record !== 'object') continue
-
-    const section = record.section || record.slug || record.page
-    const key = record.key || record.field || record.name
-
-    // Some APIs return { section, data: {...} } instead of individual records.
-    if (section && record.data && typeof record.data === 'object' && !Array.isArray(record.data)) {
-      grouped[section] = { ...(grouped[section] || {}), ...record.data }
-      continue
-    }
-
-    if (!section) continue
-
-    if (key) {
-      if (!grouped[section]) grouped[section] = {}
-      grouped[section][key] = record.value ?? record.content ?? record.data ?? ''
-    } else if (record.value !== undefined) {
-      grouped[section] = record.value
-    }
   }
 
   for (const [section, value] of Object.entries(grouped)) {
@@ -160,14 +131,13 @@ export async function deleteContent(id) {
   return data
 }
 
-// Kept for existing Content pages that still save a named section.
-// New code should prefer createContent/updateContent with the actual record ID.
+// Kept for existing Content pages that save a named section.
 export async function updateSection(section, payload) {
   if (shouldUseMocks()) return mockUpdateSection(section, payload)
 
-  const content = await getContent()
-  const records = Array.isArray(content) ? content : []
-  const matchingRecords = records.filter((item) => item.section === section)
+  const { data } = await api.get('/content')
+  const records = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : [])
+  const matchingRecords = records.filter((item) => item?.section === section)
 
   if (matchingRecords.length === 0) {
     return createContent({ section, ...payload })
